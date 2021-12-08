@@ -42,19 +42,19 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
 
 
 + (instancetype)databasePoolWithPath:(NSString *)aPath {
-    return FMDBReturnAutoreleased([[self alloc] initWithPath:aPath]);
+    return [[self alloc] initWithPath:aPath];
 }
 
 + (instancetype)databasePoolWithURL:(NSURL *)url {
-    return FMDBReturnAutoreleased([[self alloc] initWithPath:url.path]);
+    return [[self alloc] initWithPath:url.path];
 }
 
 + (instancetype)databasePoolWithPath:(NSString *)aPath flags:(int)openFlags {
-    return FMDBReturnAutoreleased([[self alloc] initWithPath:aPath flags:openFlags]);
+    return [[self alloc] initWithPath:aPath flags:openFlags];
 }
 
 + (instancetype)databasePoolWithURL:(NSURL *)url flags:(int)openFlags {
-    return FMDBReturnAutoreleased([[self alloc] initWithPath:url.path flags:openFlags]);
+    return [[self alloc] initWithPath:url.path flags:openFlags];
 }
 
 - (instancetype)initWithURL:(NSURL *)url flags:(int)openFlags vfs:(NSString *)vfsName {
@@ -68,8 +68,8 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
     if (self != nil) {
         _path               = [aPath copy];
         _lockQueue          = dispatch_queue_create([[NSString stringWithFormat:@"fmdb.%@", self] UTF8String], NULL);
-        _databaseInPool     = FMDBReturnRetained([NSMutableArray array]);
-        _databaseOutPool    = FMDBReturnRetained([NSMutableArray array]);
+        _databaseInPool     = [NSMutableArray array];
+        _databaseOutPool    = [NSMutableArray array];
         _openFlags          = openFlags;
         _vfsName            = [vfsName copy];
     }
@@ -101,24 +101,7 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
 + (Class)databaseClass {
     return [FMDatabase class];
 }
-
-- (void)dealloc {
-    
-    _delegate = 0x00;
-    FMDBRelease(_path);
-    FMDBRelease(_databaseInPool);
-    FMDBRelease(_databaseOutPool);
-    FMDBRelease(_vfsName);
-    
-    if (_lockQueue) {
-        FMDBDispatchQueueRelease(_lockQueue);
-        _lockQueue = 0x00;
-    }
-#if ! __has_feature(objc_arc)
-    [super dealloc];
-#endif
-}
-
+ 
 
 - (void)executeLocked:(void (^)(void))aBlock {
     dispatch_sync(_lockQueue, aBlock);
@@ -129,8 +112,7 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
     if (!db) { // db can be null if we set an upper bound on the # of databases to create.
         return;
     }
-    
-    [self executeLocked:^() {
+    [self executeLocked:^{
         
         if ([self->_databaseInPool containsObject:db]) {
             [[NSException exceptionWithName:@"Database already in pool" reason:@"The FMDatabase being put back into the pool is already present in the pool" userInfo:nil] raise];
@@ -147,7 +129,7 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
     __block FMDatabase *db;
     
     
-    [self executeLocked:^() {
+    [self executeLocked:^ {
         db = [self->_databaseInPool lastObject];
         
         BOOL shouldNotifyDelegate = NO;
@@ -206,7 +188,7 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
     
     __block NSUInteger count;
     
-    [self executeLocked:^() {
+    [self executeLocked:^ {
         count = [self->_databaseInPool count];
     }];
     
@@ -217,7 +199,7 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
     
     __block NSUInteger count;
     
-    [self executeLocked:^() {
+    [self executeLocked:^ {
         count = [self->_databaseOutPool count];
     }];
     
@@ -227,7 +209,7 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
 - (NSUInteger)countOfOpenDatabases {
     __block NSUInteger count;
     
-    [self executeLocked:^() {
+    [self executeLocked:^ {
         count = [self->_databaseOutPool count] + [self->_databaseInPool count];
     }];
     
@@ -235,7 +217,7 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
 }
 
 - (void)releaseAllDatabases {
-    [self executeLocked:^() {
+    [self executeLocked:^ {
         [self->_databaseOutPool removeAllObjects];
         [self->_databaseInPool removeAllObjects];
     }];
