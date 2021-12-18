@@ -33,23 +33,18 @@ NS_ASSUME_NONNULL_BEGIN
 @interface FMDatabasePool : NSObject
 
 /** Database path */
-
 @property (nonatomic, copy, nullable) NSString *path;
 
 /** Delegate object */
-
 @property (nonatomic, weak, nullable) id delegate;
 
 /** Maximum number of databases to create */
-
 @property (nonatomic, assign) NSUInteger maximumNumberOfDatabasesToCreate;
 
 /** Open flags */
-
 @property (nonatomic, readonly) int openFlags;
 
 /**  Custom virtual file system name */
-
 @property (nonatomic, copy, nullable) NSString *vfsName;
 
 
@@ -63,7 +58,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabasePool` object. `nil` on error.
  */
-
 + (instancetype)databasePoolWithPath:(NSString * _Nullable)aPath;
 
 /** Create pool using file URL.
@@ -72,7 +66,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabasePool` object. `nil` on error.
  */
-
 + (instancetype)databasePoolWithURL:(NSURL * _Nullable)url;
 
 /** Create pool using path and specified flags
@@ -82,7 +75,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabasePool` object. `nil` on error.
  */
-
 + (instancetype)databasePoolWithPath:(NSString * _Nullable)aPath flags:(int)openFlags;
 
 /** Create pool using file URL and specified flags
@@ -92,7 +84,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabasePool` object. `nil` on error.
  */
-
 + (instancetype)databasePoolWithURL:(NSURL * _Nullable)url flags:(int)openFlags;
 
 /** Create pool using path.
@@ -101,7 +92,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabasePool` object. `nil` on error.
  */
-
 - (instancetype)initWithPath:(NSString * _Nullable)aPath;
 
 /** Create pool using file URL.
@@ -110,7 +100,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabasePool` object. `nil` on error.
  */
-
 - (instancetype)initWithURL:(NSURL * _Nullable)url;
 
 /** Create pool using path and specified flags.
@@ -120,7 +109,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabasePool` object. `nil` on error.
  */
-
 - (instancetype)initWithPath:(NSString * _Nullable)aPath flags:(int)openFlags;
 
 /** Create pool using file URL and specified flags.
@@ -130,7 +118,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabasePool` object. `nil` on error.
  */
-
 - (instancetype)initWithURL:(NSURL * _Nullable)url flags:(int)openFlags;
 
 /** Create pool using path and specified flags.
@@ -141,7 +128,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabasePool` object. `nil` on error.
  */
-
 - (instancetype)initWithPath:(NSString * _Nullable)aPath flags:(int)openFlags vfs:(NSString * _Nullable)vfsName;
 
 /** Create pool using file URL and specified flags.
@@ -152,7 +138,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabasePool` object. `nil` on error.
  */
-
 - (instancetype)initWithURL:(NSURL * _Nullable)url flags:(int)openFlags vfs:(NSString * _Nullable)vfsName;
 
 /** Returns the Class of 'FMDatabase' subclass, that will be used to instantiate database object.
@@ -161,7 +146,6 @@ NS_ASSUME_NONNULL_BEGIN
 
  @return The Class of 'FMDatabase' subclass, that will be used to instantiate database object.
  */
-
 + (Class)databaseClass;
 
 ///------------------------------------------------
@@ -170,21 +154,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** Number of checked-in databases in pool
  */
-
 @property (nonatomic, readonly) NSUInteger countOfCheckedInDatabases;
 
 /** Number of checked-out databases in pool
  */
-
 @property (nonatomic, readonly) NSUInteger countOfCheckedOutDatabases;
 
 /** Total number of databases in pool
  */
-
 @property (nonatomic, readonly) NSUInteger countOfOpenDatabases;
 
 /** Release all databases in pool */
-
 - (void)releaseAllDatabases;
 
 ///------------------------------------------
@@ -195,7 +175,6 @@ NS_ASSUME_NONNULL_BEGIN
 
  @param block The code to be run on the `FMDatabasePool` pool.
  */
-
 - (void)inDatabase:(__attribute__((noescape)) void (^)(FMDatabase *db))block;
 
 /** Synchronously perform database operations in pool using transaction.
@@ -210,28 +189,24 @@ NS_ASSUME_NONNULL_BEGIN
             recommended that you use `inExclusiveTransaction`, instead, not only
             to make your intent explicit, but also to future-proof your code.
   */
-
 - (void)inTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
 /** Synchronously perform database operations in pool using exclusive transaction.
  
  @param block The code to be run on the `FMDatabasePool` pool.
  */
-
 - (void)inExclusiveTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
 /** Synchronously perform database operations in pool using deferred transaction.
 
  @param block The code to be run on the `FMDatabasePool` pool.
  */
-
 - (void)inDeferredTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
 /** Synchronously perform database operations on queue, using immediate transactions.
 
  @param block The code to be run on the queue of `FMDatabaseQueue`
  */
-
 - (void)inImmediateTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
 /** Synchronously perform database operations in pool using save point.
@@ -242,7 +217,6 @@ NS_ASSUME_NONNULL_BEGIN
 
  @warning You can not nest these, since calling it will pull another database out of the pool and you'll get a deadlock. If you need to nest, use `<[FMDatabase startSavePointWithName:error:]>` instead.
 */
-
 - (NSError * _Nullable)inSavePoint:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
 @end
@@ -252,7 +226,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  This is a category that defines the protocol for the FMDatabasePool delegate
  */
-
 @interface NSObject (FMDatabasePoolDelegate)
 
 /** Asks the delegate whether database should be added to the pool.
@@ -263,7 +236,6 @@ NS_ASSUME_NONNULL_BEGIN
  @return `YES` if it should add database to pool; `NO` if not.
  
  */
-
 - (BOOL)databasePool:(FMDatabasePool*)pool shouldAddDatabaseToPool:(FMDatabase*)database;
 
 /** Tells the delegate that database was added to the pool.
@@ -272,7 +244,6 @@ NS_ASSUME_NONNULL_BEGIN
  @param database The `FMDatabase` object.
 
  */
-
 - (void)databasePool:(FMDatabasePool*)pool didAddDatabase:(FMDatabase*)database;
 
 @end

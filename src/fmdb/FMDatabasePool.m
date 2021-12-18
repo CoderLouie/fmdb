@@ -35,10 +35,10 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
 
 
 @implementation FMDatabasePool
-@synthesize path=_path;
-@synthesize delegate=_delegate;
-@synthesize maximumNumberOfDatabasesToCreate=_maximumNumberOfDatabasesToCreate;
-@synthesize openFlags=_openFlags;
+@synthesize path = _path;
+@synthesize delegate = _delegate;
+@synthesize maximumNumberOfDatabasesToCreate = _maximumNumberOfDatabasesToCreate;
+@synthesize openFlags = _openFlags;
 
 
 + (instancetype)databasePoolWithPath:(NSString *)aPath {
@@ -120,14 +120,12 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
         
         [self->_databaseInPool addObject:db];
         [self->_databaseOutPool removeObject:db];
-        
     }];
 }
 
 - (FMDatabase*)db {
     
     __block FMDatabase *db;
-    
     
     [self executeLocked:^ {
         db = [self->_databaseInPool lastObject];
@@ -154,11 +152,8 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
         }
         
         //This ensures that the db is opened before returning
-#if SQLITE_VERSION_NUMBER >= 3005000
         BOOL success = [db openWithFlags:self->_openFlags vfs:self->_vfsName];
-#else
-        BOOL success = [db open];
-#endif
+        
         if (success) {
             if ([self->_delegate respondsToSelector:@selector(databasePool:shouldAddDatabaseToPool:)] && ![self->_delegate databasePool:self shouldAddDatabaseToPool:db]) {
                 [db close];
@@ -280,7 +275,6 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
 }
 
 - (NSError*)inSavePoint:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block {
-#if SQLITE_VERSION_NUMBER >= 3007000
     static unsigned long savePointIdx = 0;
     
     NSString *name = [NSString stringWithFormat:@"savePoint%ld", savePointIdx++];
@@ -307,11 +301,6 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
     [self pushDatabaseBackInPool:db];
     
     return err;
-#else
-    NSString *errorMessage = NSLocalizedStringFromTable(@"Save point functions require SQLite 3.7", @"FMDB", nil);
-    if (self.logsErrors) NSLog(@"%@", errorMessage);
-    return [NSError errorWithDomain:@"FMDatabase" code:0 userInfo:@{NSLocalizedDescriptionKey : errorMessage}];
-#endif
 }
 
 @end

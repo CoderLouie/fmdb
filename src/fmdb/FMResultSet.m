@@ -106,8 +106,6 @@
 }
 
 
-
-
 - (BOOL)next {
     return [self nextWithError:nil];
 }

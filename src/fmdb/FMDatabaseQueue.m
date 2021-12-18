@@ -75,17 +75,14 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
         
         _db = [[[self class] databaseClass] databaseWithPath:aPath];
         
-#if SQLITE_VERSION_NUMBER >= 3005000
         BOOL success = [_db openWithFlags:openFlags vfs:vfsName];
-#else
-        BOOL success = [_db open];
-#endif
+        
         if (!success) {
             NSLog(@"Could not create database queue for path %@", aPath);
             return nil;
         }
         
-        _path = aPath;
+        _path = [aPath copy];
         
         _queue = dispatch_queue_create([[NSString stringWithFormat:@"fmdb.%@", self] UTF8String], NULL);
         dispatch_queue_set_specific(_queue, kDispatchQueueSpecificKey, (__bridge void *)self, NULL);
@@ -135,11 +132,8 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
             _db = [[[self class] databaseClass] databaseWithPath:_path];
         }
         
-#if SQLITE_VERSION_NUMBER >= 3005000
         BOOL success = [_db openWithFlags:_openFlags vfs:_vfsName];
-#else
-        BOOL success = [_db open];
-#endif
+        
         if (!success) {
             NSLog(@"FMDatabaseQueue could not reopen database for path %@", _path);
             _db  = nil;
@@ -152,6 +146,7 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
 
 - (void)inDatabase:(__attribute__((noescape)) void (^)(FMDatabase *db))block {
 #ifndef NDEBUG
+    // 如果定义了NDEBUG这个宏，则assert不会起作用。
     /* Get the currently executing queue (which should probably be nil, but in theory could be another DB queue
      * and then check it against self to make sure we're not about to deadlock. */
     FMDatabaseQueue *currentSyncQueue = (__bridge id)dispatch_get_specific(kDispatchQueueSpecificKey);
@@ -162,7 +157,7 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
     dispatch_sync(_queue, ^ {
         
         FMDatabase *db = [self database];
-        NSLog(@"fmdb begin query");
+        
         block(db);
         
         if ([db hasOpenResultSets]) {
@@ -224,7 +219,6 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
 }
 
 - (NSError*)inSavePoint:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block {
-#if SQLITE_VERSION_NUMBER >= 3007000
     static unsigned long savePointIdx = 0;
     __block NSError *err = 0x00;
     dispatch_sync(_queue, ^() {
@@ -246,29 +240,21 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
         }
     });
     return err;
-#else
-    NSString *errorMessage = NSLocalizedStringFromTable(@"Save point functions require SQLite 3.7", @"FMDB", nil);
-    if (_db.logsErrors) NSLog(@"%@", errorMessage);
-    return [NSError errorWithDomain:@"FMDatabase" code:0 userInfo:@{NSLocalizedDescriptionKey : errorMessage}];
-#endif
 }
 
-- (BOOL)checkpoint:(FMDBCheckpointMode)mode error:(NSError * __autoreleasing *)error
-{
+- (BOOL)checkpoint:(FMDBCheckpointMode)mode error:(NSError * __autoreleasing *)error {
     return [self checkpoint:mode name:nil logFrameCount:NULL checkpointCount:NULL error:error];
 }
 
-- (BOOL)checkpoint:(FMDBCheckpointMode)mode name:(NSString *)name error:(NSError * __autoreleasing *)error
-{
+- (BOOL)checkpoint:(FMDBCheckpointMode)mode name:(NSString *)name error:(NSError * __autoreleasing *)error {
     return [self checkpoint:mode name:name logFrameCount:NULL checkpointCount:NULL error:error];
 }
 
-- (BOOL)checkpoint:(FMDBCheckpointMode)mode name:(NSString *)name logFrameCount:(int * _Nullable)logFrameCount checkpointCount:(int * _Nullable)checkpointCount error:(NSError * __autoreleasing _Nullable * _Nullable)error
-{
+- (BOOL)checkpoint:(FMDBCheckpointMode)mode name:(NSString *)name logFrameCount:(int * _Nullable)logFrameCount checkpointCount:(int * _Nullable)checkpointCount error:(NSError * __autoreleasing _Nullable * _Nullable)error {
     __block BOOL result;
     __block NSError *blockError;
-     
-    dispatch_sync(_queue, ^() {
+    
+    dispatch_sync(_queue, ^{
         result = [self.database checkpoint:mode name:name logFrameCount:NULL checkpointCount:NULL error:&blockError];
     });
     

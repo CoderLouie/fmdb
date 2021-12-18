@@ -63,7 +63,7 @@ typedef NS_ENUM(int, FMDBCheckpointMode) {
 
 /** Dictionary of cached statements */
 
-@property (nonatomic, strong, nullable) NSMutableDictionary *cachedStatements;
+@property (nonatomic, strong, nullable) NSMutableDictionary<NSString *, NSMutableSet *> *cachedStatements;
 
 ///---------------------
 /// @name Initialization
@@ -923,7 +923,7 @@ typedef NS_ENUM(int, FMDBCheckpointMode) {
  @see rollbackToSavePointWithName:error:
  
  */
-
+/// 类似于回滚
 - (NSError * _Nullable)inSavePoint:(__attribute__((noescape)) void (^)(BOOL *rollback))block;
 
 
@@ -980,11 +980,6 @@ typedef NS_ENUM(int, FMDBCheckpointMode) {
  */
 
 + (NSString*)sqliteLibVersion;
-
-
-+ (NSString*)FMDBUserVersion;
-
-+ (SInt32)FMDBVersion;
 
 
 ///------------------------

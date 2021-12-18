@@ -24,9 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
  Then use it like so:
 
     [queue inDatabase:^(FMDatabase *db) {
-        [db executeUpdate:@"INSERT INTO myTable VALUES (?)", [NSNumber numberWithInt:1]];
-        [db executeUpdate:@"INSERT INTO myTable VALUES (?)", [NSNumber numberWithInt:2]];
-        [db executeUpdate:@"INSERT INTO myTable VALUES (?)", [NSNumber numberWithInt:3]];
+        [db executeUpdate:@"INSERT INTO myTable VALUES (?)", @(1)];
+        [db executeUpdate:@"INSERT INTO myTable VALUES (?)", @(2)];
+        [db executeUpdate:@"INSERT INTO myTable VALUES (?)", @(3)];
 
         FMResultSet *rs = [db executeQuery:@"select * from foo"];
         while ([rs next]) {
@@ -60,18 +60,15 @@ NS_ASSUME_NONNULL_BEGIN
  @warning The calls to `FMDatabaseQueue`'s methods are blocking.  So even though you are passing along blocks, they will **not** be run on another thread.
 
  */
-
 @interface FMDatabaseQueue : NSObject
-/** Path of database */
 
+/** Path of database */
 @property (nonatomic, copy, nullable) NSString *path;
 
 /** Open flags */
-
 @property (nonatomic, readonly) int openFlags;
 
 /**  Custom virtual file system name */
-
 @property (nonatomic, copy, nullable) NSString *vfsName;
 
 ///----------------------------------------------------
@@ -84,7 +81,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabaseQueue` object. `nil` on error.
  */
-
 + (nullable instancetype)databaseQueueWithPath:(NSString * _Nullable)aPath;
 
 /** Create queue using file URL.
@@ -93,7 +89,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabaseQueue` object. `nil` on error.
  */
-
 + (nullable instancetype)databaseQueueWithURL:(NSURL * _Nullable)url;
 
 /** Create queue using path and specified flags.
@@ -120,7 +115,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabaseQueue` object. `nil` on error.
  */
-
 - (nullable instancetype)initWithPath:(NSString * _Nullable)aPath;
 
 /** Create queue using file URL.
@@ -129,7 +123,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabaseQueue` object. `nil` on error.
  */
-
 - (nullable instancetype)initWithURL:(NSURL * _Nullable)url;
 
 /** Create queue using path and specified flags.
@@ -139,7 +132,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabaseQueue` object. `nil` on error.
  */
-
 - (nullable instancetype)initWithPath:(NSString * _Nullable)aPath flags:(int)openFlags;
 
 /** Create queue using file URL and specified flags.
@@ -149,7 +141,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabaseQueue` object. `nil` on error.
  */
-
 - (nullable instancetype)initWithURL:(NSURL * _Nullable)url flags:(int)openFlags;
 
 /** Create queue using path and specified flags.
@@ -160,7 +151,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabaseQueue` object. `nil` on error.
  */
-
 - (nullable instancetype)initWithPath:(NSString * _Nullable)aPath flags:(int)openFlags vfs:(NSString * _Nullable)vfsName;
 
 /** Create queue using file URL and specified flags.
@@ -171,7 +161,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The `FMDatabaseQueue` object. `nil` on error.
  */
-
 - (nullable instancetype)initWithURL:(NSURL * _Nullable)url flags:(int)openFlags vfs:(NSString * _Nullable)vfsName;
 
 /** Returns the Class of 'FMDatabase' subclass, that will be used to instantiate database object.
@@ -180,15 +169,12 @@ NS_ASSUME_NONNULL_BEGIN
  
  @return The Class of 'FMDatabase' subclass, that will be used to instantiate database object.
  */
-
 + (Class)databaseClass;
 
 /** Close database used by queue. */
-
 - (void)close;
 
 /** Interupt pending database operation. */
-
 - (void)interrupt;
 
 ///-----------------------------------------------
@@ -199,7 +185,6 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param block The code to be run on the queue of `FMDatabaseQueue`
  */
-
 - (void)inDatabase:(__attribute__((noescape)) void (^)(FMDatabase *db))block;
 
 /** Synchronously perform database operations on queue, using transactions.
@@ -215,7 +200,6 @@ NS_ASSUME_NONNULL_BEGIN
              to make your intent explicit, but also to future-proof your code.
 
  */
-
 - (void)inTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
 /** Synchronously perform database operations on queue, using deferred transactions.
@@ -229,14 +213,12 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param block The code to be run on the queue of `FMDatabaseQueue`
  */
-
 - (void)inExclusiveTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
 /** Synchronously perform database operations on queue, using immediate transactions.
 
  @param block The code to be run on the queue of `FMDatabaseQueue`
  */
-
 - (void)inImmediateTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
 ///-----------------------------------------------

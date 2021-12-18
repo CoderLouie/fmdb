@@ -208,17 +208,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic) uint32_t applicationID;
 
-#if TARGET_OS_MAC && !TARGET_OS_IPHONE
-
-/** Retrieve application ID string
-
- @see setApplicationIDString:
- */
-
-@property (nonatomic, retain) NSString *applicationIDString;
-
-#endif
-
 ///-----------------------------------
 /// @name user version identifier tasks
 ///-----------------------------------
