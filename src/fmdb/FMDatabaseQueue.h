@@ -185,7 +185,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param block The code to be run on the queue of `FMDatabaseQueue`
  */
-- (void)inDatabase:(__attribute__((noescape)) void (^)(FMDatabase *db))block;
+- (nullable id)inDatabase:(__attribute__((noescape)) id _Nullable (^)(FMDatabase *db))block;
 
 /** Synchronously perform database operations on queue, using transactions.
 
@@ -200,26 +200,26 @@ NS_ASSUME_NONNULL_BEGIN
              to make your intent explicit, but also to future-proof your code.
 
  */
-- (void)inTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+- (nullable id)inTransaction:(__attribute__((noescape)) id _Nullable (^)(FMDatabase *db, BOOL *rollback))block;
 
 /** Synchronously perform database operations on queue, using deferred transactions.
  
  @param block The code to be run on the queue of `FMDatabaseQueue`
  */
 
-- (void)inDeferredTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+- (nullable id)inDeferredTransaction:(__attribute__((noescape)) id _Nullable (^)(FMDatabase *db, BOOL *rollback))block;
 
 /** Synchronously perform database operations on queue, using exclusive transactions.
  
  @param block The code to be run on the queue of `FMDatabaseQueue`
  */
-- (void)inExclusiveTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+- (nullable id)inExclusiveTransaction:(__attribute__((noescape)) id _Nullable (^)(FMDatabase *db, BOOL *rollback))block;
 
 /** Synchronously perform database operations on queue, using immediate transactions.
 
  @param block The code to be run on the queue of `FMDatabaseQueue`
  */
-- (void)inImmediateTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+- (nullable id)inImmediateTransaction:(__attribute__((noescape)) id _Nullable (^)(FMDatabase *db, BOOL *rollback))block;
 
 ///-----------------------------------------------
 /// @name Dispatching database operations to queue

@@ -144,7 +144,7 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
     return _db;
 }
 
-- (void)inDatabase:(__attribute__((noescape)) void (^)(FMDatabase *db))block {
+- (id)inDatabase:(__attribute__((noescape)) id (^)(FMDatabase *db))block {
 #ifndef NDEBUG
     // 如果定义了NDEBUG这个宏，则assert不会起作用。
     /* Get the currently executing queue (which should probably be nil, but in theory could be another DB queue
@@ -154,11 +154,12 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
 #endif
     
     NSLog(@"fmdb %@", [NSThread currentThread]);
+    __block id result = nil;
     dispatch_sync(_queue, ^ {
         
         FMDatabase *db = [self database];
         
-        block(db);
+        result = block(db);
         
         if ([db hasOpenResultSets]) {
             NSLog(@"Warning: there is at least one open result set around after performing [FMDatabaseQueue inDatabase:]");
@@ -172,10 +173,12 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
 #endif
         }
     });
+    return result;
 }
 
-- (void)beginTransaction:(FMDBTransaction)transaction withBlock:(void (^)(FMDatabase *db, BOOL *rollback))block {
-    dispatch_sync(_queue, ^() {
+- (id)beginTransaction:(FMDBTransaction)transaction withBlock:(id (^)(FMDatabase *db, BOOL *rollback))block {
+    __block id result = nil;
+    dispatch_sync(_queue, ^{
         
         BOOL shouldRollback = NO;
 
@@ -191,7 +194,7 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
                 break;
         }
         
-        block([self database], &shouldRollback);
+        result = block([self database], &shouldRollback);
         
         if (shouldRollback) {
             [[self database] rollback];
@@ -200,22 +203,23 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
             [[self database] commit];
         }
     });
+    return result;
 }
 
-- (void)inTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block {
-    [self beginTransaction:FMDBTransactionExclusive withBlock:block];
+- (id)inTransaction:(__attribute__((noescape)) id (^)(FMDatabase *db, BOOL *rollback))block {
+    return [self beginTransaction:FMDBTransactionExclusive withBlock:block];
 }
 
-- (void)inDeferredTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block {
-    [self beginTransaction:FMDBTransactionDeferred withBlock:block];
+- (id)inDeferredTransaction:(__attribute__((noescape)) id (^)(FMDatabase *db, BOOL *rollback))block {
+    return [self beginTransaction:FMDBTransactionDeferred withBlock:block];
 }
 
-- (void)inExclusiveTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block {
-    [self beginTransaction:FMDBTransactionExclusive withBlock:block];
+- (id)inExclusiveTransaction:(__attribute__((noescape)) id (^)(FMDatabase *db, BOOL *rollback))block {
+    return [self beginTransaction:FMDBTransactionExclusive withBlock:block];
 }
 
-- (void)inImmediateTransaction:(__attribute__((noescape)) void (^)(FMDatabase * _Nonnull, BOOL * _Nonnull))block {
-    [self beginTransaction:FMDBTransactionImmediate withBlock:block];
+- (id)inImmediateTransaction:(__attribute__((noescape)) id (^)(FMDatabase * _Nonnull, BOOL * _Nonnull))block {
+    return [self beginTransaction:FMDBTransactionImmediate withBlock:block];
 }
 
 - (NSError*)inSavePoint:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block {

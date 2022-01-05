@@ -1202,7 +1202,13 @@ int FMDBExecuteBulkSQLCallback(void *theBlockAsVoid, int columns, char **values,
     
     return b;
 }
-
+/*
+ 在 DEFFERED 模式事务中，事务开始执行时，不预先获取任何锁。当进行读操作，获取 SHARED LOCK 锁；当进行第一次写操作，获取 RESERVED 锁。适合读写频繁的场景
+ 　　
+ 在 IMMEDIATE 模式事务中，事务开始执行，就获取 RESERVED 锁。这时，其他连接只能进行读操作。
+ 　　
+ 在 EXCLUSIVE 模式事务中，事务开始执行，就获取 EXCLUSIVE 锁。这是，其他连接无法进行任何读写操作。适合数据库读写较少的情况
+ */ 
 - (BOOL)beginDeferredTransaction {
     
     BOOL b = [self executeUpdateWithSql:@"begin deferred transaction"];
